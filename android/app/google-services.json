@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "510961697309",
+    "project_id": "dailytrack-32379",
+    "storage_bucket": "dailytrack-32379.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:510961697309:android:2b8fddf9e3c060e8d4bcf4",
+        "android_client_info": {
+          "package_name": "com.example.project_anne"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA2eatDk0xfvXwwi0Y5H2YgK73noMSsZGE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
