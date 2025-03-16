@@ -2,8 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class DatabaseService {
-  final FirebaseFirestore _firestore =
-      FirebaseFirestore.instance; //สร้างตัวแปรเชื่อม Firestore
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final String? uid = FirebaseAuth.instance.currentUser?.uid;
 
   // บันทึกหนังสือ
@@ -159,77 +158,71 @@ class DatabaseService {
     }
   }
 
-
-
 // เพิ่มอารมณ์
-Future<void> addMoods({
-  required DateTime selectedDay,
-  String? emoji,         // เพิ่ม emoji
-  String? moodAboutDay,
-  String? status,
-  String? note,
-}) async {
-  try {
-    if (uid != null) {
-      String formattedDate = selectedDay.toIso8601String().split("T")[0];
+  Future<void> addMoods({
+    required DateTime selectedDay,
+    String? emoji,
+    String? moodAboutDay,
+    String? status,
+    String? note,
+  }) async {
+    try {
+      if (uid != null) {
+        String formattedDate = selectedDay.toIso8601String().split("T")[0];
+        await _firestore
+            .collection('users')
+            .doc(uid)
+            .collection('moods')
+            .doc(formattedDate)
+            .set({
+          'emoji': emoji,
+          'moodAboutDay': moodAboutDay,
+          'status': status,
+          'note': note,
+          'timestamp': FieldValue.serverTimestamp(),
+        });
 
-      // ใช้ .doc(formattedDate).set() เพื่อให้ document ID เป็นวันที่
-      await _firestore
-          .collection('users')
-          .doc(uid)
-          .collection('moods')
-          .doc(formattedDate) // ใช้วันที่เป็น document ID
-          .set({
-        'emoji': emoji,
-        'moodAboutDay': moodAboutDay,
-        'status': status,
-        'note': note,
-        'timestamp': FieldValue.serverTimestamp(),
-      });
-
-      print("Mood data successfully added for date: $formattedDate");
-    } else {
-      print("No user UID found.");
+        print("Mood data successfully added for date: $formattedDate");
+      } else {
+        print("No user UID found.");
+      }
+    } catch (e) {
+      print("Error adding mood data: $e");
     }
-  } catch (e) {
-    print("Error adding mood data: $e");
   }
-}
 
 // ดึงอารมณ์
-Future<Map<String, dynamic>?> loadMood(DateTime selectedDay) async {
-  try {
-    String? uid = FirebaseAuth.instance.currentUser?.uid;
+  Future<Map<String, dynamic>?> loadMood(DateTime selectedDay) async {
+    try {
+      String? uid = FirebaseAuth.instance.currentUser?.uid;
 
-    if (uid != null) {
-      String formattedDate = selectedDay.toIso8601String().split("T")[0];
+      if (uid != null) {
+        String formattedDate = selectedDay.toIso8601String().split("T")[0];
 
-      DocumentSnapshot doc = await _firestore
-          .collection('users')
-          .doc(uid)
-          .collection('moods')
-          .doc(formattedDate) // ค้นหาด้วย formattedDate ที่เป็น document ID
-          .get();
+        DocumentSnapshot doc = await _firestore
+            .collection('users')
+            .doc(uid)
+            .collection('moods')
+            .doc(formattedDate)
+            .get();
 
-      if (doc.exists) {
-        return {
-          "emoji": doc["emoji"] ?? "",
-          "note": doc["note"] ?? "",
-          "status": doc["status"] ?? "",
-          "moodAboutDay": doc["moodAboutDay"] ?? "",
-        };
+        if (doc.exists) {
+          return {
+            "emoji": doc["emoji"] ?? "",
+            "note": doc["note"] ?? "",
+            "status": doc["status"] ?? "",
+            "moodAboutDay": doc["moodAboutDay"] ?? "",
+          };
+        } else {
+          print("No mood data found for $formattedDate");
+          return null;
+        }
       } else {
-        print("No mood data found for $formattedDate");
-        return null;
+        print("No user UID found.");
       }
-    } else {
-      print("No user UID found.");
+    } catch (e) {
+      print("Error loading mood data: $e");
     }
-  } catch (e) {
-    print("Error loading mood data: $e");
+    return null;
   }
-  return null;
-}
-
-
 }

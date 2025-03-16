@@ -31,10 +31,7 @@ class _SignupState extends State<Signup> {
         password: _passwordController.text.trim(),
       );
 
-      // ดึง UID ของผู้ใช้
       String uid = userCredential.user!.uid;
-
-      // บันทึกข้อมูลลง Firestore
       await FirebaseFirestore.instance.collection('users').doc(uid).set({
         'fullName': _nameController.text.trim(),
         'email': _emailController.text.trim(),
@@ -257,8 +254,9 @@ class _SignupState extends State<Signup> {
                             Navigator.pushAndRemoveUntil(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const LoginScreen(),),
-                                 (route) => false,
+                                builder: (context) => const LoginScreen(),
+                              ),
+                              (route) => false,
                             );
                           },
                           child: const Text(

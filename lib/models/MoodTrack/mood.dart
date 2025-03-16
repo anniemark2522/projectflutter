@@ -11,7 +11,7 @@ class MoodCalendar extends StatefulWidget {
 
 class _MoodCalendarState extends State<MoodCalendar> {
   DateTime _focusedDay = DateTime.now();
-  DateTime? _selectedDay;
+  DateTime? _selectedDay; //ใช้เเค่เเช็คการลือกวันอย่างเดียว
   String _selectedMood = "";
   String _note = "";
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -93,34 +93,46 @@ class _MoodCalendarState extends State<MoodCalendar> {
     }
   }
 
-  void _showMoodPicker() {
+  void _showMoodPicker(DateTime selectedDay) {
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
+        return StreamBuilder<DocumentSnapshot>(
+          stream: _getMoodStream(selectedDay),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            }
+
+            if (snapshot.hasError) {
+              return Center(child: Text("Error: ${snapshot.error}"));
+            }
+
+            if (!snapshot.hasData || !snapshot.data!.exists) {
+              return Center(child: Text("No mood data found."));
+            }
+
+            var moodData = snapshot.data!.data() as Map<String, dynamic>;
+
             return Container(
               padding: EdgeInsets.all(20),
               height: 800,
               decoration: BoxDecoration(
-                gradient: LinearGradient(colors: [
-                  Colors.white,
-                  const Color.fromARGB(255, 210, 224, 190)
-                ]),
+                gradient: LinearGradient(
+                  colors: [Colors.white, Color.fromARGB(255, 210, 224, 190)],
+                ),
                 borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
               ),
               child: SingleChildScrollView(
                 child: Column(
                   children: [
                     SizedBox(height: 10),
-                    Text(
-                      "Select a note:",
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
+                    Text("Select a note:",
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold)),
                     Wrap(
                       spacing: 10,
                       children: [
@@ -132,10 +144,10 @@ class _MoodCalendarState extends State<MoodCalendar> {
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: _note == "Feeling great today! 😊"
-                                ? const Color.fromARGB(255, 255, 218, 238)
-                                : const Color.fromARGB(255, 255, 255, 255),
+                                ? Color.fromARGB(255, 255, 218, 238)
+                                : Colors.white,
                             foregroundColor: _note == "Feeling great today! 😊"
-                                ? const Color.fromARGB(255, 61, 39, 39)
+                                ? Color.fromARGB(255, 61, 39, 39)
                                 : Colors.black,
                           ),
                           child: Text("Feeling great! 😊"),
@@ -148,10 +160,10 @@ class _MoodCalendarState extends State<MoodCalendar> {
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: _note == "Not my best day 😔"
-                                ? const Color.fromARGB(255, 255, 218, 238)
-                                : const Color.fromARGB(255, 255, 255, 255),
+                                ? Color.fromARGB(255, 255, 218, 238)
+                                : Colors.white,
                             foregroundColor: _note == "Not my best day 😔"
-                                ? const Color.fromARGB(255, 61, 39, 39)
+                                ? Color.fromARGB(255, 61, 39, 39)
                                 : Colors.black,
                           ),
                           child: Text("Not my best 😔"),
@@ -165,25 +177,20 @@ class _MoodCalendarState extends State<MoodCalendar> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor:
                                 _note == "Excited for something new! 🎉"
-                                    ? const Color.fromARGB(255, 255, 218, 238)
-                                    : const Color.fromARGB(255, 255, 255, 255),
+                                    ? Color.fromARGB(255, 255, 218, 238)
+                                    : Colors.white,
                             foregroundColor:
                                 _note == "Excited for something new! 🎉"
-                                    ? const Color.fromARGB(255, 61, 39, 39)
+                                    ? Color.fromARGB(255, 61, 39, 39)
                                     : Colors.black,
                           ),
                           child: Text("Excited! 🎉"),
                         ),
                       ],
                     ),
-                    Text(
-                      "Mood About Day?",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: const Color.fromARGB(255, 67, 53, 92),
-                      ),
-                    ),
+                    Text("Mood About Day?",
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold)),
                     SizedBox(height: 15),
                     GridView.builder(
                       shrinkWrap: true,
@@ -209,30 +216,18 @@ class _MoodCalendarState extends State<MoodCalendar> {
                             ),
                             elevation: 5,
                             color: isSelected
-                                ? const Color.fromARGB(255, 255, 218, 238)
-                                : const Color.fromARGB(255, 255, 255, 255),
+                                ? Color.fromARGB(255, 255, 218, 238)
+                                : Colors.white,
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text(
-                                  mood["emoji"]!,
-                                  style: TextStyle(
-                                      fontSize: 40,
-                                      color: isSelected
-                                          ? Colors.white
-                                          : Colors.black),
-                                ),
+                                Text(mood["emoji"]!,
+                                    style: TextStyle(fontSize: 40)),
                                 SizedBox(height: 5),
-                                Text(
-                                  mood["value"]!,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: isSelected
-                                        ? const Color.fromARGB(255, 61, 39, 39)
-                                        : Colors.black,
-                                  ),
-                                ),
+                                Text(mood["value"]!,
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold)),
                               ],
                             ),
                           ),
@@ -270,179 +265,133 @@ class _MoodCalendarState extends State<MoodCalendar> {
     );
   }
 
+  Stream<DocumentSnapshot> _getMoodStream(DateTime selectedDay) {
+    String? uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid != null) {
+      String formattedDate = selectedDay.toIso8601String().split("T")[0];
+
+      return _firestore
+          .collection('users')
+          .doc(uid)
+          .collection('moods')
+          .doc(formattedDate)
+          .snapshots();
+    }
+    return Stream.empty();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Column(
-          children: [
-            TableCalendar(
-              firstDay: DateTime.utc(2020, 1, 1),
-              lastDay: DateTime.utc(2030, 12, 31),
-              focusedDay: _focusedDay,
-              selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-              onDaySelected: (selectedDay, focusedDay) {
-                setState(() {
-                  _selectedDay = selectedDay;
-                  _focusedDay = focusedDay;
-                });
-                _loadMood(); // Load mood for the selected day
-              },
-              calendarFormat: CalendarFormat.month,
-              calendarStyle: CalendarStyle(
-                todayDecoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Color(0xFFFFAACD), // Light pink
-                      Color(0xFFF38CA6), // Deep pink
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                        color: Colors.grey.shade400,
-                        blurRadius: 6,
-                        spreadRadius: 2)
-                  ],
+    return Scaffold(
+      backgroundColor: Color(0xFFEFF9F0),
+      body: Column(
+        children: [
+          // TableCalendar
+          TableCalendar(
+            firstDay: DateTime.utc(2020, 1, 1),
+            lastDay: DateTime.utc(2030, 12, 31),
+            focusedDay: _focusedDay,
+            selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+            onDaySelected: (selectedDay, focusedDay) {
+              setState(() {
+                _selectedDay = selectedDay;
+                _focusedDay = focusedDay;
+              });
+              _loadMood();
+            },
+            calendarFormat: CalendarFormat.month,
+            calendarStyle: CalendarStyle(
+              todayDecoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFFFFAACD), Color(0xFFF38CA6)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
-                selectedDecoration: BoxDecoration(
-                  color: Color(0xFFFFCC6C), // Warm orange
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                        color: Colors.black26, blurRadius: 6, spreadRadius: 2)
-                  ],
-                ),
-                weekendTextStyle: TextStyle(
-                  color: Colors.redAccent,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-                defaultTextStyle: TextStyle(
-                  color: Color(0xFF534684),
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                ),
-                outsideDaysVisible: false, // Hide outside month days
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                      color: Colors.grey.shade400,
+                      blurRadius: 6,
+                      spreadRadius: 2)
+                ],
               ),
-              headerStyle: HeaderStyle(
-                formatButtonVisible: false,
-                titleCentered: true,
-                leftChevronIcon:
-                    Icon(Icons.chevron_left, color: Color(0xFF4B3B68)),
-                rightChevronIcon:
-                    Icon(Icons.chevron_right, color: Color(0xFF4B3B68)),
-                titleTextStyle: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF4B3B68),
-                  letterSpacing: 1.2,
-                ),
-              ),
-              daysOfWeekStyle: DaysOfWeekStyle(
-                weekdayStyle: TextStyle(
-                  color: Color(0xFF4B3B68),
-                  fontWeight: FontWeight.bold,
-                ),
-                weekendStyle: TextStyle(
-                  color: Colors.redAccent,
-                  fontWeight: FontWeight.bold,
-                ),
+              selectedDecoration: BoxDecoration(
+                color: Color(0xFFFFCC6C),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                      color: Colors.black26, blurRadius: 6, spreadRadius: 2)
+                ],
               ),
             ),
-            SizedBox(height: 10),
-            _selectedMood.isNotEmpty
-                ? Column(
-                    children: [
-                      Text("Your Mood: $_selectedMood",
-                          style: TextStyle(
-                              fontSize: 22, fontWeight: FontWeight.bold)),
-                      if (_note.isNotEmpty)
-                        Card(
-                          color: Colors.blue.shade50,
-                          elevation: 5,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15)),
-                          child: Padding(
-                            padding: EdgeInsets.all(15),
-                            child: Text("📖 $_note",
-                                style: TextStyle(
-                                    fontSize: 18, fontStyle: FontStyle.italic)),
-                          ),
-                        ),
-                    ],
-                  )
-                : Text("Please Tell Something about Your Mood...",
-                    style: TextStyle(fontSize: 18, color: Colors.grey)),
-          ],
-        ),
-        Positioned(
-  bottom: 18,
-  right: 15,
-  child: FloatingActionButton(
-    backgroundColor: _selectedDay != null &&
-            _selectedDay!.year == DateTime.now().year &&
-            _selectedDay!.month == DateTime.now().month &&
-            _selectedDay!.day == DateTime.now().day
-        ? (_isSavedToday
-            ? const Color.fromARGB(255, 168, 168, 168) // สีเทาหากบันทึกแล้ว
-            : const Color.fromARGB(255, 247, 167, 187)) // สีปกติหากยังไม่ได้บันทึก
-        : const Color.fromARGB(255, 168, 168, 168), // สีเทาหากไม่ใช่วันปัจจุบัน
-    onPressed: () {
-      if (_selectedDay != null &&
-          _selectedDay!.year == DateTime.now().year &&
-          _selectedDay!.month == DateTime.now().month &&
-          _selectedDay!.day == DateTime.now().day) {
-        // ตรวจสอบว่ายังไม่ได้บันทึกในวันปัจจุบัน
-        if (!_isSavedToday) {
-          _showMoodPicker(); // เปิดตัวเลือกอารมณ์
-        } else {
-          // หากบันทึกข้อมูลแล้วในวันปัจจุบัน
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text("You can only save mood once per day!"),
+            headerStyle: HeaderStyle(
+              formatButtonVisible: false,
+              titleCentered: true,
+              leftChevronIcon:
+                  Icon(Icons.chevron_left, color: Color(0xFF4B3B68)),
+              rightChevronIcon:
+                  Icon(Icons.chevron_right, color: Color(0xFF4B3B68)),
+              titleTextStyle: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF4B3B68),
+              ),
             ),
-          );
-        }
-      } else {
-        // แสดงข้อความถ้าไม่ใช่วันปัจจุบัน
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("You can only save mood for today!"),
           ),
-        );
-      }
-    },
-    shape: CircleBorder(),
-    child: Icon(
-      Icons.add,
-      size: 25,
-      color: Colors.white,
-    ),
-  ),
-)
-
-      ],
+          SizedBox(height: 10),
+          _selectedMood.isNotEmpty
+              ? Column(
+                  children: [
+                    Text("Your Mood: $_selectedMood",
+                        style: TextStyle(
+                            fontSize: 22, fontWeight: FontWeight.bold)),
+                    if (_note.isNotEmpty)
+                      Card(
+                        color: Colors.blue.shade50,
+                        elevation: 5,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15)),
+                        child: Padding(
+                          padding: EdgeInsets.all(15),
+                          child: Text("📖 $_note",
+                              style: TextStyle(
+                                  fontSize: 18, fontStyle: FontStyle.italic)),
+                        ),
+                      ),
+                  ],
+                )
+              : Text("Please Tell Something about Your Mood...",
+                  style: TextStyle(fontSize: 18, color: Colors.grey)),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: _selectedDay != null &&
+                _selectedDay!.year == DateTime.now().year &&
+                _selectedDay!.month == DateTime.now().month &&
+                _selectedDay!.day == DateTime.now().day
+            ? (_isSavedToday ? Colors.grey : Color.fromARGB(255, 247, 167, 187))
+            : Colors.grey,
+        onPressed: () {
+          if (_selectedDay != null &&
+              _selectedDay!.year == DateTime.now().year &&
+              _selectedDay!.month == DateTime.now().month &&
+              _selectedDay!.day == DateTime.now().day) {
+            if (!_isSavedToday) {
+              _showMoodPicker(_selectedDay!);
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text("You can only save mood once per day!")),
+              );
+            }
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("You can only save mood for today!")),
+            );
+          }
+        },
+        shape: CircleBorder(),
+        child: Icon(Icons.add, size: 25, color: Colors.white),
+      ),
     );
   }
 }
-
-
-// Positioned(
-//           bottom: 18,
-//           right: 15,
-//           child: FloatingActionButton(
-//             backgroundColor: _isSavedToday
-//                 ? const Color.fromARGB(255, 168, 168, 168)
-//                 : const Color.fromARGB(255, 247, 167, 187), // Normal color
-//             onPressed: _isSavedToday ? null : _showMoodPicker,
-//             shape: CircleBorder(), // Disable if saved
-//             child: Icon(
-//               Icons.add,
-//               size: 25,
-//               color: Colors.white,
-//             ),
-//           ),
-//         ),

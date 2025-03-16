@@ -4,7 +4,6 @@ import 'package:project_anne/models/MoodTrack/mood.dart';
 import 'package:project_anne/models/SettingTrack/setting.dart';
 import '../models/BookTrack/book_page.dart';
 import '../models/homePage.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class HomePage extends StatefulWidget {
@@ -93,13 +92,13 @@ class _HomePageState extends State<HomePage> {
               decoration: BoxDecoration(
                 image: DecorationImage(
                   image: AssetImage('assets/images/Track (4)-Photoroom.png'),
-                  fit: BoxFit.fill, // จะรักษาสัดส่วนของรูปภาพ
+                  fit: BoxFit.fill,
                 ),
               ),
             ),
             SizedBox(width: 2),
             Text(
-              appBarTitles[screenIndex], // ใช้ชื่อตาม screenIndex
+              appBarTitles[screenIndex],
               style: TextStyle(
                 color: Color(0xFF534684),
                 fontWeight: FontWeight.bold,
