@@ -53,31 +53,27 @@ class _MoodCalendarState extends State<MoodCalendar> {
 
   String get _uid => _auth.currentUser?.uid ?? "";
 
-  // Save mood data to Firestore
   void _saveMood(String emoji, String moodValue, String message) async {
     if (_selectedDay != null) {
       String formattedDate = _selectedDay!.toIso8601String().split("T")[0];
 
-      // เรียกใช้ DatabaseService เพื่อเพิ่มข้อมูล (เพิ่ม selectedDay และ emoji)
       await DatabaseService().addMoods(
-        selectedDay: _selectedDay!, // ส่งวันที่เข้าไปเพื่อใช้เป็น document ID
-        emoji: emoji, // ส่ง emoji
-        moodAboutDay: message, // ส่งข้อความจาก mood
-        status: moodValue, // ส่งสถานะจาก mood
-        note: _note, // ส่งข้อความเพิ่มเติมจาก note
+        selectedDay: _selectedDay!,
+        emoji: emoji,
+        moodAboutDay: message,
+        status: moodValue,
+        note: _note,
       );
 
       setState(() {
         _selectedMood = emoji;
-        _isSavedToday = true; // Mark as saved for today
+        _isSavedToday = true;
       });
     }
   }
 
-// Load mood data from Firestore
   void _loadMood() async {
     if (_selectedDay != null) {
-      // เรียกใช้ฟังก์ชัน loadMood() จาก DatabaseService
       Map<String, dynamic>? moodData =
           await DatabaseService().loadMood(_selectedDay!);
 
@@ -97,7 +93,6 @@ class _MoodCalendarState extends State<MoodCalendar> {
     }
   }
 
-  // Show mood picker bottom sheet
   void _showMoodPicker() {
     showModalBottomSheet(
       context: context,
@@ -107,10 +102,9 @@ class _MoodCalendarState extends State<MoodCalendar> {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setState) {
-            return AnimatedContainer(
-              duration: Duration(milliseconds: 300),
+            return Container(
               padding: EdgeInsets.all(20),
-              height: 800, // ปรับขนาดความสูงให้เพียงพอสำหรับปุ่มและเนื้อหา
+              height: 800,
               decoration: BoxDecoration(
                 gradient: LinearGradient(colors: [
                   Colors.white,
@@ -299,27 +293,62 @@ class _MoodCalendarState extends State<MoodCalendar> {
                 todayDecoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      const Color.fromARGB(255, 255, 170, 205),
-                      Color.fromARGB(255, 243, 140, 166)
+                      Color(0xFFFFAACD), // Light pink
+                      Color(0xFFF38CA6), // Deep pink
                     ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
                   shape: BoxShape.circle,
-                  boxShadow: [BoxShadow(color: Colors.grey, blurRadius: 5)],
+                  boxShadow: [
+                    BoxShadow(
+                        color: Colors.grey.shade400,
+                        blurRadius: 6,
+                        spreadRadius: 2)
+                  ],
                 ),
                 selectedDecoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 255, 204, 108),
+                  color: Color(0xFFFFCC6C), // Warm orange
                   shape: BoxShape.circle,
-                  boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 5)],
+                  boxShadow: [
+                    BoxShadow(
+                        color: Colors.black26, blurRadius: 6, spreadRadius: 2)
+                  ],
                 ),
-                weekendTextStyle: TextStyle(color: Colors.redAccent),
+                weekendTextStyle: TextStyle(
+                  color: Colors.redAccent,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+                defaultTextStyle: TextStyle(
+                  color: Color(0xFF534684),
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
+                outsideDaysVisible: false, // Hide outside month days
               ),
               headerStyle: HeaderStyle(
                 formatButtonVisible: false,
                 titleCentered: true,
+                leftChevronIcon:
+                    Icon(Icons.chevron_left, color: Color(0xFF4B3B68)),
+                rightChevronIcon:
+                    Icon(Icons.chevron_right, color: Color(0xFF4B3B68)),
                 titleTextStyle: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: const Color.fromARGB(255, 75, 59, 104),
+                  color: Color(0xFF4B3B68),
+                  letterSpacing: 1.2,
+                ),
+              ),
+              daysOfWeekStyle: DaysOfWeekStyle(
+                weekdayStyle: TextStyle(
+                  color: Color(0xFF4B3B68),
+                  fontWeight: FontWeight.bold,
+                ),
+                weekendStyle: TextStyle(
+                  color: Colors.redAccent,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),
@@ -350,22 +379,70 @@ class _MoodCalendarState extends State<MoodCalendar> {
           ],
         ),
         Positioned(
-          bottom: 18,
-          right: 15,
-          child: FloatingActionButton(
-            backgroundColor: _isSavedToday
-                ? const Color.fromARGB(255, 168, 168, 168)
-                : const Color.fromARGB(255, 247, 167, 187), // Normal color
-            onPressed: _isSavedToday ? null : _showMoodPicker,
-            shape: CircleBorder(), // Disable if saved
-            child: Icon(
-              Icons.add,
-              size: 25,
-              color: Colors.white,
+  bottom: 18,
+  right: 15,
+  child: FloatingActionButton(
+    backgroundColor: _selectedDay != null &&
+            _selectedDay!.year == DateTime.now().year &&
+            _selectedDay!.month == DateTime.now().month &&
+            _selectedDay!.day == DateTime.now().day
+        ? (_isSavedToday
+            ? const Color.fromARGB(255, 168, 168, 168) // สีเทาหากบันทึกแล้ว
+            : const Color.fromARGB(255, 247, 167, 187)) // สีปกติหากยังไม่ได้บันทึก
+        : const Color.fromARGB(255, 168, 168, 168), // สีเทาหากไม่ใช่วันปัจจุบัน
+    onPressed: () {
+      if (_selectedDay != null &&
+          _selectedDay!.year == DateTime.now().year &&
+          _selectedDay!.month == DateTime.now().month &&
+          _selectedDay!.day == DateTime.now().day) {
+        // ตรวจสอบว่ายังไม่ได้บันทึกในวันปัจจุบัน
+        if (!_isSavedToday) {
+          _showMoodPicker(); // เปิดตัวเลือกอารมณ์
+        } else {
+          // หากบันทึกข้อมูลแล้วในวันปัจจุบัน
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("You can only save mood once per day!"),
             ),
+          );
+        }
+      } else {
+        // แสดงข้อความถ้าไม่ใช่วันปัจจุบัน
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("You can only save mood for today!"),
           ),
-        ),
+        );
+      }
+    },
+    shape: CircleBorder(),
+    child: Icon(
+      Icons.add,
+      size: 25,
+      color: Colors.white,
+    ),
+  ),
+)
+
       ],
     );
   }
 }
+
+
+// Positioned(
+//           bottom: 18,
+//           right: 15,
+//           child: FloatingActionButton(
+//             backgroundColor: _isSavedToday
+//                 ? const Color.fromARGB(255, 168, 168, 168)
+//                 : const Color.fromARGB(255, 247, 167, 187), // Normal color
+//             onPressed: _isSavedToday ? null : _showMoodPicker,
+//             shape: CircleBorder(), // Disable if saved
+//             child: Icon(
+//               Icons.add,
+//               size: 25,
+//               color: Colors.white,
+//             ),
+//           ),
+//         ),
