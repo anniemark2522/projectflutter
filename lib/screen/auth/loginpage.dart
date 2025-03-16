@@ -2,7 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:project_anne/screen/home_screen.dart';
-import 'signup.dart'; // Import Signup screen
+import 'signup.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -20,7 +20,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   bool isEmailFocused = false;
   bool isPasswordFocused = false;
-  bool _isPasswordVisible = false; 
+  bool _isPasswordVisible = false;
 
   @override
   void initState() {
@@ -80,22 +80,23 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     // เช็คว่ารูปแบบอีเมลถูกต้องไหม
-    if (!RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$").hasMatch(email)) {
+    if (!RegExp(
+            r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
+        .hasMatch(email)) {
       _showErrorDialog("Invalid email format.");
       return;
     }
 
     try {
       // ล็อกอินด้วยอีเมลและรหัสผ่าน
-      UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+      UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
 
       // ใช้ UID เพื่อตรวจสอบการเข้าใช้งาน
       String uid = userCredential.user!.uid;
-
-      // คุณสามารถใช้ UID เพื่อไปทำการตรวจสอบหรือเช็คข้อมูลเพิ่มเติมได้ที่นี่
       print("User logged in with UID: $uid");
 
       // ถ้าล็อกอินสำเร็จ ก็ไปหน้า HomePage
@@ -123,13 +124,12 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // Background decoration
           Container(
             height: MediaQuery.of(context).size.height * 0.4,
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('assets/images/Track (1)-Photoroom.png'),
-                 fit: BoxFit.cover,),
+                  image: AssetImage('assets/images/Track (1)-Photoroom.png'),
+                  fit: BoxFit.cover),
               color: Color(0xFFC5E1A5),
               borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(50),
@@ -137,8 +137,6 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
           ),
-
-          // Login form container
           Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -202,7 +200,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       // Password input field
                       TextField(
                         focusNode: _passwordFocus,
-                        obscureText: !_isPasswordVisible, // ควบคุมการแสดงรหัสผ่าน
+                        obscureText: !_isPasswordVisible,
                         controller: _passwordController,
                         decoration: InputDecoration(
                           prefixIcon: Icon(
@@ -225,7 +223,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 color: Color(0xFFFEB0B9), width: 2),
                             borderRadius: BorderRadius.circular(30),
                           ),
-                          suffixIcon: IconButton( //ลูกกระตากระพริบ
+                          suffixIcon: IconButton(
                             icon: Icon(
                               _isPasswordVisible
                                   ? Icons.visibility
@@ -233,7 +231,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             onPressed: () {
                               setState(() {
-                                _isPasswordVisible = !_isPasswordVisible; // ซ่อนรหัสผ่าน
+                                _isPasswordVisible = !_isPasswordVisible;
                               });
                             },
                           ),
