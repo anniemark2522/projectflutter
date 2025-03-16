@@ -44,63 +44,73 @@ class _SavingPageState extends State<SavingPage> {
           TableCalendar(
             firstDay: DateTime.utc(2025, 1, 1),
             lastDay: DateTime.utc(2026, 12, 31),
-            calendarFormat: CalendarFormat.week,
             focusedDay: _focusedDay,
-            selectedDayPredicate: (day) {
-              return _selectedDay != null &&
-                  day.year == _selectedDay!.year &&
-                  day.month == _selectedDay!.month &&
-                  day.day == _selectedDay!.day;
-            },
+            selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
             onDaySelected: (selectedDay, focusedDay) {
               setState(() {
                 _selectedDay = selectedDay;
                 _focusedDay = focusedDay;
               });
             },
+            calendarFormat: CalendarFormat.week,
             calendarStyle: CalendarStyle(
-                todayDecoration: BoxDecoration(
-                  color: Color(0XFFB3E680),
-                  shape: BoxShape.circle,
+              todayDecoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    const Color.fromARGB(255, 255, 170, 205),
+                    Color.fromARGB(255, 243, 140, 166),
+                  ],
                 ),
-                todayTextStyle: TextStyle(
-                    color: Colors.green,
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold),
-                selectedDecoration: BoxDecoration(
-                  color: Color(0XFFFEB0B9),
-                  shape: BoxShape.circle,
-                ),
-                defaultTextStyle: TextStyle(
-                    color: Color(0xFF534684),
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold),
-                weekendTextStyle: TextStyle(
-                  color: Colors.red,
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                ),
-                selectedTextStyle: TextStyle(
-                    color: Color(0xFF534684),
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold)),
+                shape: BoxShape.circle,
+                boxShadow: [BoxShadow(color: Colors.grey, blurRadius: 5)],
+              ),
+              selectedDecoration: BoxDecoration(
+                color: const Color.fromARGB(255, 255, 204, 108),
+                shape: BoxShape.circle,
+                boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 5)],
+              ),
+              todayTextStyle: TextStyle(
+                color: Colors.white,
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+              ),
+              selectedTextStyle: TextStyle(
+                color: const Color.fromARGB(255, 75, 59, 104),
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+              ),
+              defaultTextStyle: TextStyle(
+                color: Color(0xFF534684),
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+              ),
+              weekendTextStyle: TextStyle(
+                color: Colors.redAccent,
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             headerStyle: HeaderStyle(
               formatButtonVisible: false,
               titleCentered: true,
               titleTextStyle: TextStyle(
-                  fontSize: 25,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green),
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: const Color.fromARGB(255, 75, 59, 104),
+              ),
             ),
             daysOfWeekStyle: DaysOfWeekStyle(
-                weekdayStyle: TextStyle(
-                    color: Colors.green,
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold),
-                weekendStyle: TextStyle(
-                    color: Colors.red,
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold)),
+              weekdayStyle: TextStyle(
+                color: Colors.green,
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+              ),
+              weekendStyle: TextStyle(
+                color: Colors.red,
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
           StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance

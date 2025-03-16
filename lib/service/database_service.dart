@@ -159,36 +159,7 @@ class DatabaseService {
     }
   }
 
-//เพิ่มอารมณ์
-  // Future<void> addMoods({
-  //   String? moodAboutDay,
-  //   String? status,
-  //   String? note, // เพิ่ม field สำหรับบันทึกข้อความเพิ่มเติม
-  // }) async {
-  //   try {
-  //     // ตรวจสอบว่า uid มีค่า
-  //     if (uid != null) {
-  //       // เพิ่มข้อมูลเข้า Firestore
-  //       await _firestore
-  //           .collection('users') // ใช้ collection ชื่อ 'users'
-  //           .doc(uid) // ใช้ UID ของผู้ใช้
-  //           .collection('dailyMoods') // ใช้ subcollection 'dailyMoods'
-  //           .add({
-  //         'moodAboutDay': moodAboutDay, // ส่งข้อความจาก mood
-  //         'status': status, // บันทึกสถานะ
-  //         'note': note, // เพิ่มข้อความเพิ่มเติม
-  //         'timestamp':
-  //             FieldValue.serverTimestamp(), // ใช้เวลาของอุปกรณ์เป็นค่าเริ่มต้น
-  //       });
 
-  //       print("Mood data successfully added!");
-  //     } else {
-  //       print("No user UID found.");
-  //     }
-  //   } catch (e) {
-  //     print("Error adding mood data: $e");
-  //   }
-  // }
 
 // เพิ่มอารมณ์
 Future<void> addMoods({

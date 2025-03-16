@@ -28,6 +28,7 @@ class _NumberPadBottomSheetState extends State<NumberPadBottomSheet> {
     {"name": "Gifts", "icon": Icons.card_giftcard},
     {"name": "Clothing", "icon": Icons.shopping_bag},
     {"name": "Entertainment", "icon": Icons.movie},
+    {"name": "Plan Future", "icon": Icons.star},
   ];
 
   void _onIconTap(int index) {
@@ -245,7 +246,7 @@ class CategoryItem extends StatelessWidget {
           category['name'],
           style: TextStyle(
             color: Color(0xFF534684),
-            fontSize: 13,
+            fontSize: 12,
             fontWeight: FontWeight.bold,
           ),
         ),
